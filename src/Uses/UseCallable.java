@@ -63,12 +63,11 @@ public class UseCallable
 		BigDecimal b = new BigDecimal(1);
 		BigDecimal a = new BigDecimal(0);
 		BigDecimal n = new BigDecimal(288675135);
-		// BigDecimal n = new BigDecimal(8675135);
 		
-		// Computation variables
-		// h = (b-a)/n
-		BigDecimal h = (b.subtract(a)).divide(n, mathContext);
+		// Computation variables		
+		BigDecimal h = (b.subtract(a)).divide(n, mathContext); // h = (b-a)/n
 		// step = n/(4), precision of 8, rounded up
+		// divide by 4 cause i have 4 proccessors on my computer
 		BigDecimal step = n.divide(new BigDecimal(4), new MathContext(8, RoundingMode.CEILING));
 		System.out.println(step);
 		
@@ -77,14 +76,14 @@ public class UseCallable
 		BigDecimal to = step;
 		
 		/*
-		 * step = to = n/4, from = 0.5, n = n
+		 * step = to = n/4 (rounded to CEIL), from = 0.5, n = 288675135 (for sufficient precision)
 		 * 
 		 * Algorithm - Please explain succinctly
 		 * ----------------------
-		 * While n/4 <= n
-		 * create a new computer
-		 * from += n/4
-		 * to += n/4
+		 * While to <= n
+		 * create a new Callable to compute Pi
+		 * from += step
+		 * to += step
 		 * ----------------------
 		 * 
 		 * Pi computation:
@@ -114,12 +113,17 @@ public class UseCallable
 			to = to.add(step);
 			}
 		
-		// Another callable? WHY?!?!
+		// Trick:
+		// another callable because we increment 'to' by 'step' value, which was rounded to CEIL
+		// and therefore, 'to' will be greater than 'n' at the fourth passage in the while loop
+		// and we need to consider the fourth callable from 'from' to 'n', not from 'from' to
+		// 'n+...', but i can change the condition in the while loop to simplify
 		callable = new CallableExemple(from, n, h, mathContext);
 		FutureTask<BigDecimal> futureT = new FutureTask<BigDecimal>(callable);
 		executor.submit(futureT);
 		listOfFutureTasks.add(futureT);
-		//		
+		
+				
 		//		// Get the results
 		//		for(Future<BigDecimal> fut:listOfFutures)
 		//			{
@@ -207,7 +211,6 @@ public class UseCallable
 		double b = 1;
 		double a = 0;
 		double n = 288675135;
-		// double n = 87093;
 		
 		// Variables de calcul
 		double result = 0.0;
@@ -266,12 +269,5 @@ public class UseCallable
 		System.out.println("Pi exact : " + pi_exact);
 		System.out.println("Différence avec valeur exacte : " + pi_exact.subtract(somme_totale).abs());
 		}
-	
-	/*
-	 * Attributs statics
-	 */
-	
-	// private static final int X = 1;
-	// private static final int Y = 800000;
 	
 	}
