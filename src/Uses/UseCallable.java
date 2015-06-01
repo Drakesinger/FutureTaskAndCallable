@@ -7,11 +7,14 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+
+import com.bilat.tools.io.console.Clavier;
 
 import callable.CallableExemple;
 
@@ -25,31 +28,35 @@ public class UseCallable
 		{
 		System.out.println("Méthode parallèle précise avec Callable pour trouver Pi :");
 		piParallelCallable();
-		
-		System.out.println("\nMéthode séquentielle précise pour trouver Pi :");
-		// piSequentielPrecis();
-		
-		System.out.println("\nMéthode séquentielle pour trouver Pi :");
-		piSequentiel();
-		
+		//		
+		//		System.out.println("\nMéthode séquentielle précise pour trouver Pi :");
+		//		piSequentielPrecis();
+		//		
+		//		System.out.println("\nMéthode séquentielle pour trouver Pi :");
+		//		piSequentiel();
 		}
 	
 	/**
 	 * Temps d'exécution : 190 sec = environ 3 minutes ( ce qui est environ 2x plus court que minutes de mieux que le même algo en séquentiel)
+	 * 
+	 * TODO PLEASE WRITE IN EEEEEEENGLISH!
 	 */
 	private static void piParallelCallable()
 		{
+		int precision = 22;
 		BigDecimal somme_totale = new BigDecimal(0);
 		
 		long start = System.currentTimeMillis();
 		
-		MathContext mathContext = new MathContext(22);
+		// Math Context set up to a certain precision.
+		MathContext mathContext = new MathContext(precision);
 		
-		// Get ExecutorService from Executors utility class, thread pool size is
-		// equal to available processors on the computer
+		// Get ExecutorService from Executors utility class, thread pool size is equal to available processors on the computer
 		ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-		// create a list to hold the Future object associated with Callable
-		List<Future<BigDecimal>> list = new ArrayList<Future<BigDecimal>>();
+		// Create a list to hold the Future object associated with Callable.
+		//List<Future<BigDecimal>> listOfFutures = new ArrayList<Future<BigDecimal>>();
+		List<FutureTask<BigDecimal>> listOfFutureTasks = new ArrayList<FutureTask<BigDecimal>>();
+		
 		// Create MyCallable instance
 		Callable<BigDecimal> callable;
 		
@@ -58,56 +65,116 @@ public class UseCallable
 		BigDecimal n = new BigDecimal(288675135);
 		// BigDecimal n = new BigDecimal(8675135);
 		
-		// Variables de calcul
+		// Computation variables
+		// h = (b-a)/n
 		BigDecimal h = (b.subtract(a)).divide(n, mathContext);
-		
+		// step = n/(4), precision of 8, rounded up
 		BigDecimal step = n.divide(new BigDecimal(4), new MathContext(8, RoundingMode.CEILING));
 		System.out.println(step);
 		
+		// From = 0.5
 		BigDecimal from = new BigDecimal(0.5);
 		BigDecimal to = step;
 		
+		/*
+		 * step = to = n/4, from = 0.5, n = n
+		 * 
+		 * Algorithm - Please explain succinctly
+		 * ----------------------
+		 * While n/4 <= n
+		 * create a new computer
+		 * from += n/4
+		 * to += n/4
+		 * ----------------------
+		 */
 		while(to.compareTo(n) <= 0)
 			{
-			
 			callable = new CallableExemple(from, to, h, mathContext);
-			// submit Callable tasks to be executed by thread pool
-			Future<BigDecimal> future = executor.submit(callable);
-			
-			///////////////////////////////////////////////////////////////////////////////////////////////////
-			// Same thing with FutureTask /////////////////////////////////////////////////////////////////////
-			///////////////////////////////////////////////////////////////////////////////////////////////////
+				
 				{
-			FutureTask<BigDecimal> futureTask = new FutureTask<BigDecimal>(callable);
-			executor.submit(futureTask);
-			// TODO
-			//add the Future task to the list.
+				//				// submit Callable tasks to be executed by thread pool
+				//				Future<BigDecimal> future = executor.submit(callable);
+				//				// add Future to the list, we can get return value using Future
+				//				listOfFutures.add(future);
+				}
+				
+				// Same thing with FutureTask
+				{
+				FutureTask<BigDecimal> futureTask = new FutureTask<BigDecimal>(callable);
+				// Add the Future task to the list.
+				listOfFutureTasks.add(futureTask);
 				}
 			
-			// add Future to the list, we can get return value using Future
-			list.add(future);
 			from = from.add(step);
 			to = to.add(step);
 			}
 		
+		//		// Another callable? WHY?!?!
+		//		callable = new CallableExemple(from, n, h, mathContext);
+		//		Future<BigDecimal> future = executor.submit(callable);
+		//		listOfFutures.add(future);
+		//		
+		//		// Get the results
+		//		for(Future<BigDecimal> fut:listOfFutures)
+		//			{
+		//			try
+		//				{
+		//				
+		//				// Future.get() waits for task to get completed
+		//				somme_totale = somme_totale.add(fut.get());
+		//				}
+		//			catch (InterruptedException | ExecutionException e)
+		//				{
+		//				e.printStackTrace();
+		//				}
+		//			}
 		
-		callable = new CallableExemple(from, n, h, mathContext);
-		Future<BigDecimal> future = executor.submit(callable);
-		list.add(future);
-		
-		for(Future<BigDecimal> fut:list)
+		// Get the results, give the user a choice to cancel the tasks.
+		for(FutureTask<BigDecimal> futureTask:listOfFutureTasks)
 			{
 			try
 				{
+				if (!futureTask.isDone())
+					{
+					boolean correctInputFromConsole = false;
+					while(!correctInputFromConsole)
+						{
+						String stringRepresentation = futureTask.toString();
+						int indexOfFutureTask = listOfFutureTasks.indexOf(futureTask);
+						System.out.println("Do you want to cancel this " + stringRepresentation + " @index:" + indexOfFutureTask + " task? (yes/no)");
+						String input = Clavier.lireString();
+						
+						switch(input)
+							{
+							case "yes":
+								futureTask.cancel(true);
+								correctInputFromConsole = true;
+								break;
+							case "no":
+								correctInputFromConsole = true;
+								// Do nothing
+								break;
+							default:
+								System.out.println("Please write \"yes\" or \"no\".");
+								break;
+							}
+						}
+					}
+				
 				// Future.get() waits for task to get completed
-				somme_totale = somme_totale.add(fut.get());
+				somme_totale = somme_totale.add(futureTask.get());
 				}
 			catch (InterruptedException | ExecutionException e)
 				{
 				e.printStackTrace();
 				}
+			catch (CancellationException ce)
+				{
+				System.out.println("The task was canceled.");
+				}
 			}
-		// shut down the executor service now
+		
+		// Shut down the executor service now
 		executor.shutdown();
 		
 		somme_totale = somme_totale.multiply(new BigDecimal(4));
