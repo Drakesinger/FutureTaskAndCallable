@@ -86,6 +86,9 @@ public class UseCallable
 		 * from += n/4
 		 * to += n/4
 		 * ----------------------
+		 * 
+		 * Pi computation:
+		 * SUM n=0 -> inf [(4/(8*n+1)-2/(8n+4)-1/(8n+5)-1/(8n+6))*(1/16)^n]
 		 */
 		while(to.compareTo(n) <= 0)
 			{
@@ -101,6 +104,8 @@ public class UseCallable
 				// Same thing with FutureTask
 				{
 				FutureTask<BigDecimal> futureTask = new FutureTask<BigDecimal>(callable);
+				executor.submit(futureTask);
+				System.out.println("Submited task.");
 				// Add the Future task to the list.
 				listOfFutureTasks.add(futureTask);
 				}
@@ -109,10 +114,11 @@ public class UseCallable
 			to = to.add(step);
 			}
 		
-		//		// Another callable? WHY?!?!
-		//		callable = new CallableExemple(from, n, h, mathContext);
-		//		Future<BigDecimal> future = executor.submit(callable);
-		//		listOfFutures.add(future);
+		// Another callable? WHY?!?!
+		callable = new CallableExemple(from, n, h, mathContext);
+		FutureTask<BigDecimal> futureT = new FutureTask<BigDecimal>(callable);
+		executor.submit(futureT);
+		listOfFutureTasks.add(futureT);
 		//		
 		//		// Get the results
 		//		for(Future<BigDecimal> fut:listOfFutures)
@@ -134,30 +140,31 @@ public class UseCallable
 			{
 			try
 				{
-				if (!futureTask.isDone())
+				String stringRepresentation = futureTask.toString();
+				int indexOfFutureTask = listOfFutureTasks.indexOf(futureTask);
+				System.out.println(stringRepresentation + " @index:" + indexOfFutureTask + " task? Is done?" + futureTask.isDone());
+				
+				boolean correctInputFromConsole = false;
+				while(!correctInputFromConsole && !futureTask.isDone())
 					{
-					boolean correctInputFromConsole = false;
-					while(!correctInputFromConsole)
+					stringRepresentation = futureTask.toString();
+					indexOfFutureTask = listOfFutureTasks.indexOf(futureTask);
+					System.out.println("Do you want to cancel this " + stringRepresentation + " @index:" + indexOfFutureTask + " task? (yes/no)");
+					String input = Clavier.lireString();
+					
+					switch(input)
 						{
-						String stringRepresentation = futureTask.toString();
-						int indexOfFutureTask = listOfFutureTasks.indexOf(futureTask);
-						System.out.println("Do you want to cancel this " + stringRepresentation + " @index:" + indexOfFutureTask + " task? (yes/no)");
-						String input = Clavier.lireString();
-						
-						switch(input)
-							{
-							case "yes":
-								futureTask.cancel(true);
-								correctInputFromConsole = true;
-								break;
-							case "no":
-								correctInputFromConsole = true;
-								// Do nothing
-								break;
-							default:
-								System.out.println("Please write \"yes\" or \"no\".");
-								break;
-							}
+						case "yes":
+							futureTask.cancel(true);
+							correctInputFromConsole = true;
+							break;
+						case "no":
+							correctInputFromConsole = true;
+							// Do nothing
+							break;
+						default:
+							System.out.println("Please write \"yes\" or \"no\".");
+							break;
 						}
 					}
 				

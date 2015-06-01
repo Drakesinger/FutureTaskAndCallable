@@ -30,7 +30,9 @@ public class CallableExemple implements Callable<BigDecimal>
 		for(BigDecimal i = from; i.compareTo(to) < 0; i = i.add(one))
 			{
 			BigDecimal factor = h.multiply(i); //2.0*(i*h) - h / 2.0
+			//System.out.println("Computing: " + this.toString() + " result: " + result);
 			result = result.add(h.multiply(one.divide(one.add(factor.multiply(factor)), mathContext)));
+			
 			}
 		
 		// return the partial sum of this thread
