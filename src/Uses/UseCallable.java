@@ -11,12 +11,11 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
-import com.bilat.tools.io.console.Clavier;
-
 import callable.CallableExemple;
+
+import com.bilat.tools.io.console.Clavier;
 
 public class UseCallable
 	{
@@ -123,7 +122,6 @@ public class UseCallable
 		executor.submit(futureT);
 		listOfFutureTasks.add(futureT);
 		
-				
 		//		// Get the results
 		//		for(Future<BigDecimal> fut:listOfFutures)
 		//			{
@@ -148,8 +146,8 @@ public class UseCallable
 				int indexOfFutureTask = listOfFutureTasks.indexOf(futureTask);
 				System.out.println(stringRepresentation + " @index:" + indexOfFutureTask + " task? Is done?" + futureTask.isDone());
 				
-				boolean correctInputFromConsole = false;
-				while(!correctInputFromConsole && !futureTask.isDone())
+				//boolean correctInputFromConsole = false;
+				while(/*!correctInputFromConsole && */!futureTask.isDone())
 					{
 					stringRepresentation = futureTask.toString();
 					indexOfFutureTask = listOfFutureTasks.indexOf(futureTask);
@@ -160,10 +158,10 @@ public class UseCallable
 						{
 						case "yes":
 							futureTask.cancel(true);
-							correctInputFromConsole = true;
+							//correctInputFromConsole = true;
 							break;
 						case "no":
-							correctInputFromConsole = true;
+							//correctInputFromConsole = true;
 							// Do nothing
 							break;
 						default:

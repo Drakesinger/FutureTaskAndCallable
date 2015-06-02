@@ -26,9 +26,13 @@ public class CallableExemple implements Callable<BigDecimal>
 		this.h = h;
 		this.mathContext = mathContext;
 		
+		this.showComputations = false;
 		this.result = new BigDecimal(0);
-		
 		}
+	
+	/*
+	 * Public Methods 
+	 */
 	
 	@Override
 	public BigDecimal call() throws Exception
@@ -37,8 +41,12 @@ public class CallableExemple implements Callable<BigDecimal>
 		for(BigDecimal i = from; i.compareTo(to) < 0; i = i.add(one))
 			{
 			BigDecimal factor = h.multiply(i); //2.0*(i*h) - h / 2.0
-			//System.out.println("Computing: " + this.toString() + " result: " + result);
-			result = result.add(h.multiply(one.divide(one.add(factor.multiply(factor)), mathContext)));			
+			
+			if (showComputations)
+				{
+				System.out.println("Computing: " + this.toString() + " result: " + result);
+				}
+			result = result.add(h.multiply(one.divide(one.add(factor.multiply(factor)), mathContext)));
 			}
 		
 		// return the partial sum of this thread
@@ -46,13 +54,31 @@ public class CallableExemple implements Callable<BigDecimal>
 		}
 	
 	/*
-	 * Attributs
+	 * Getters / Setters 
+	 */
+	
+	public boolean isShowComputations()
+		{
+		return this.showComputations;
+		}
+	
+	public void setShowComputations(boolean showComputations)
+		{
+		this.showComputations = showComputations;
+		}
+	
+	/*
+	 * Attributes
 	 */
 	// Inputs
 	private BigDecimal from;
+	
 	private BigDecimal to;
 	private BigDecimal h;
 	private MathContext mathContext;
+	
+	// Tools
+	private boolean showComputations;
 	
 	// Output
 	private BigDecimal result;
