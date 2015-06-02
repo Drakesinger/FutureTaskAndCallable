@@ -22,7 +22,9 @@ public class UseCallable
 	{
 	
 	/**
-	 * Trouver Pi en calculant l'intégrale de 1/(1+x*x) entre 0 et 1;
+	 * Find Pi, using the Integral of 
+	 * 			1/(1+x*x)
+	 * between 0 and 1;
 	 */
 	public static void main(String[] args)
 		{
@@ -37,9 +39,7 @@ public class UseCallable
 		}
 	
 	/**
-	 * Temps d'exécution : 190 sec = environ 3 minutes ( ce qui est environ 2x plus court que minutes de mieux que le même algo en séquentiel)
-	 * 
-	 * TODO PLEASE WRITE IN EEEEEEENGLISH!
+	 * Execution Time : 190 sec = 3 minutes ( which is about 2 times shorter than the same algorithm used in sequential)
 	 */
 	private static void piParallelCallable()
 		{

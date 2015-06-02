@@ -6,7 +6,14 @@ import java.math.MathContext;
 import java.util.concurrent.Callable;
 
 /*
- * Calcul une partie de l'intégrale de h*(1/1+x2) 
+ * Compute a part of the Integral of :
+ * 
+ *  			h*(1/1+x2) 			
+ *  
+ *  ( x2 = pow(x,2) )
+ *  
+ *  in order to get Pi in our case
+ *  
  */
 public class CallableExemple implements Callable<BigDecimal>
 	{
@@ -31,8 +38,7 @@ public class CallableExemple implements Callable<BigDecimal>
 			{
 			BigDecimal factor = h.multiply(i); //2.0*(i*h) - h / 2.0
 			//System.out.println("Computing: " + this.toString() + " result: " + result);
-			result = result.add(h.multiply(one.divide(one.add(factor.multiply(factor)), mathContext)));
-			
+			result = result.add(h.multiply(one.divide(one.add(factor.multiply(factor)), mathContext)));			
 			}
 		
 		// return the partial sum of this thread
