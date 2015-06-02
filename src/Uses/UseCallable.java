@@ -78,12 +78,19 @@ public class UseCallable
 		/*
 		 * step = to = n/4 (rounded to CEIL), from = 0.5, n = 288675135 (for sufficient precision)
 		 * 
-		 * Algorithm - Please explain succinctly
+		 * Algorithm - distribute computations to 4 Callable
 		 * ----------------------
-		 * While to <= n
-		 * create a new Callable to compute Pi
-		 * from += step
-		 * to += step
+		 * In our case we compute an integral with the rectangles algorithm
+		 * h = base width of each rectangle
+		 * from/n = middle of 1st rectangle's base
+		 * to/n =  middle of last rectangle's base
+		 * While (to <= n)
+		 * 		create a new Callable which computes, in our case, part of the Integral [ 1/(1+(x*x)) ] from variable 'a' to variable 'b'
+		 * 		  the part is defined by from, to, and h variables
+		 * 		  mathContext variable is about computation precision
+		 * 		submit the new task to the Executor
+		 * 
+		 * in our case, sum of the 4 part of the Integral = Pi/4
 		 * ----------------------
 		 */
 		while(to.compareTo(n) <= 0)
@@ -102,8 +109,8 @@ public class UseCallable
 		// Trick:
 		// another callable because we increment 'to' by 'step' value, which was rounded to CEIL
 		// and therefore, 'to' will be greater than 'n' at the fourth passage in the while loop
-		// and we need to consider the fourth callable from 'from' to 'n', not from 'from' to
-		// 'n+...', but i can change the condition in the while loop to simplify
+		// and we need to consider the fourth callable from 'from' to 'n', (not from 'from' to
+		// 'n+something')
 		callable = new SpecializedCallable(from, n, h, mathContext);
 		FutureTask<BigDecimal> futureT = new SpecializedFutureTask<BigDecimal>(callable);
 		executor.submit(futureT);
