@@ -4,23 +4,22 @@ package futuretask;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 
-import callable.CallableExemple;
+import callable.SpecializedCallable;
 
 public class SpecializedFutureTask<V> extends FutureTask<V>
 	{
 	
+	/*------------------------------------------------------------------*\
+	|*							Constructors							*|
+	\*------------------------------------------------------------------*/
 	public SpecializedFutureTask(Callable<V> callable)
 		{
 		super(callable);
-		this.callable = (CallableExemple)callable;
+		this.callable = (SpecializedCallable)callable;
 		}
 	
 	/*------------------------------------------------------------------*\
-	|*							Constructeurs							*|
-	\*------------------------------------------------------------------*/
-	
-	/*------------------------------------------------------------------*\
-	|*							Methodes Public							*|
+	|*							Methods Public							*|
 	\*------------------------------------------------------------------*/
 	
 	public void modifyCallable(boolean showComputations)
@@ -28,21 +27,15 @@ public class SpecializedFutureTask<V> extends FutureTask<V>
 		this.callable.setShowComputations(showComputations);
 		}
 	
-	/*------------------------------*\
-	|*				Set				*|
-	\*------------------------------*/
-	
-	/*------------------------------*\
-	|*				Get				*|
-	\*------------------------------*/
-	
 	/*------------------------------------------------------------------*\
-	|*							Methodes Private						*|
+	|*							Methods Private							*|
 	\*------------------------------------------------------------------*/
 	
 	/*------------------------------------------------------------------*\
-	|*							Attributs Private						*|
+	|*							Attributes Private						*|
 	\*------------------------------------------------------------------*/
-	private CallableExemple callable;
+	
+	// Inputs
+	private SpecializedCallable callable;
 	
 	}

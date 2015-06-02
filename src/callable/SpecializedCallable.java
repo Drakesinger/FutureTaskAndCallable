@@ -15,12 +15,11 @@ import java.util.concurrent.Callable;
  *  in order to get Pi in our case
  *  
  */
-public class CallableExemple implements Callable<BigDecimal>
+public class SpecializedCallable implements Callable<BigDecimal>
 	{
 	
-	public CallableExemple(BigDecimal from, BigDecimal to, BigDecimal h, MathContext mathContext)
+	public SpecializedCallable(BigDecimal from, BigDecimal to, BigDecimal h, MathContext mathContext)
 		{
-		//		System.out.println("From :" + from + " / to : " + to + " / h : " + h);
 		this.from = from;
 		this.to = to;
 		this.h = h;
@@ -30,9 +29,9 @@ public class CallableExemple implements Callable<BigDecimal>
 		this.result = new BigDecimal(0);
 		}
 	
-	/*
-	 * Public Methods 
-	 */
+	/*------------------------------------------------------------------*\
+	|*							Methods Public							*|
+	\*------------------------------------------------------------------*/
 	
 	@Override
 	public BigDecimal call() throws Exception
@@ -53,23 +52,18 @@ public class CallableExemple implements Callable<BigDecimal>
 		return result;
 		}
 	
-	/*
-	 * Getters / Setters 
-	 */
+	/*------------------------------*\
+	|*				Set				*|
+	\*------------------------------*/
 	
-	public boolean isShowComputations()
-		{
-		return this.showComputations;
-		}
-	
-	public void setShowComputations(boolean showComputations)
+	public synchronized void setShowComputations(boolean showComputations)
 		{
 		this.showComputations = showComputations;
 		}
 	
-	/*
-	 * Attributes
-	 */
+	/*------------------------------------------------------------------*\
+	|*							Attributes Private						*|
+	\*------------------------------------------------------------------*/
 	// Inputs
 	private BigDecimal from;
 	

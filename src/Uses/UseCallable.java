@@ -13,7 +13,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 
-import callable.CallableExemple;
+import futuretask.SpecializedFutureTask;
+import callable.SpecializedCallable;
 
 import com.bilat.tools.io.console.Clavier;
 
@@ -52,8 +53,8 @@ public class UseCallable
 		
 		// Get ExecutorService from Executors utility class, thread pool size is equal to available processors on the computer
 		ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-		// Create a list to hold the Future object associated with Callable.
-		//List<Future<BigDecimal>> listOfFutures = new ArrayList<Future<BigDecimal>>();
+		
+		// Create a list to hold the FutureTesk objects associated with Callable.
 		List<FutureTask<BigDecimal>> listOfFutureTasks = new ArrayList<FutureTask<BigDecimal>>();
 		
 		// Create MyCallable instance
@@ -66,7 +67,7 @@ public class UseCallable
 		// Computation variables		
 		BigDecimal h = (b.subtract(a)).divide(n, mathContext); // h = (b-a)/n
 		// step = n/(4), precision of 8, rounded up
-		// divide by 4 cause i have 4 proccessors on my computer
+		// divide by 4 (due to nr of processors)
 		BigDecimal step = n.divide(new BigDecimal(4), new MathContext(8, RoundingMode.CEILING));
 		System.out.println(step);
 		
@@ -84,29 +85,15 @@ public class UseCallable
 		 * from += step
 		 * to += step
 		 * ----------------------
-		 * 
-		 * Pi computation:
-		 * SUM n=0 -> inf [(4/(8*n+1)-2/(8n+4)-1/(8n+5)-1/(8n+6))*(1/16)^n]
 		 */
 		while(to.compareTo(n) <= 0)
 			{
-			callable = new CallableExemple(from, to, h, mathContext);
-				
-				{
-				//				// submit Callable tasks to be executed by thread pool
-				//				Future<BigDecimal> future = executor.submit(callable);
-				//				// add Future to the list, we can get return value using Future
-				//				listOfFutures.add(future);
-				}
-				
-				// Same thing with FutureTask
-				{
-				FutureTask<BigDecimal> futureTask = new FutureTask<BigDecimal>(callable);
-				executor.submit(futureTask);
-				System.out.println("Submited task.");
-				// Add the Future task to the list.
-				listOfFutureTasks.add(futureTask);
-				}
+			callable = new SpecializedCallable(from, to, h, mathContext);
+			FutureTask<BigDecimal> futureTask = new SpecializedFutureTask<BigDecimal>(callable);
+			executor.submit(futureTask);
+			System.out.println("Submited task.");
+			// Add the Future task to the list.
+			listOfFutureTasks.add(futureTask);
 			
 			from = from.add(step);
 			to = to.add(step);
@@ -117,25 +104,10 @@ public class UseCallable
 		// and therefore, 'to' will be greater than 'n' at the fourth passage in the while loop
 		// and we need to consider the fourth callable from 'from' to 'n', not from 'from' to
 		// 'n+...', but i can change the condition in the while loop to simplify
-		callable = new CallableExemple(from, n, h, mathContext);
-		FutureTask<BigDecimal> futureT = new FutureTask<BigDecimal>(callable);
+		callable = new SpecializedCallable(from, n, h, mathContext);
+		FutureTask<BigDecimal> futureT = new SpecializedFutureTask<BigDecimal>(callable);
 		executor.submit(futureT);
 		listOfFutureTasks.add(futureT);
-		
-		//		// Get the results
-		//		for(Future<BigDecimal> fut:listOfFutures)
-		//			{
-		//			try
-		//				{
-		//				
-		//				// Future.get() waits for task to get completed
-		//				somme_totale = somme_totale.add(fut.get());
-		//				}
-		//			catch (InterruptedException | ExecutionException e)
-		//				{
-		//				e.printStackTrace();
-		//				}
-		//			}
 		
 		// Get the results, give the user a choice to cancel the tasks.
 		for(FutureTask<BigDecimal> futureTask:listOfFutureTasks)
@@ -144,28 +116,36 @@ public class UseCallable
 				{
 				String stringRepresentation = futureTask.toString();
 				int indexOfFutureTask = listOfFutureTasks.indexOf(futureTask);
-				System.out.println(stringRepresentation + " @index:" + indexOfFutureTask + " task? Is done?" + futureTask.isDone());
+				String isDone = stringRepresentation + " @index:" + indexOfFutureTask + " task? Is done?" + futureTask.isDone();
+				System.out.println(isDone);
 				
-				//boolean correctInputFromConsole = false;
-				while(/*!correctInputFromConsole && */!futureTask.isDone())
+				String cancelQuerry = "Do you want to cancel this " + stringRepresentation + " @index:" + indexOfFutureTask + " task? (1/0)";
+				String modifyQuerry = "Do you want to show it's computations? (1/0)";
+				
+				while(!futureTask.isDone())
 					{
-					stringRepresentation = futureTask.toString();
-					indexOfFutureTask = listOfFutureTasks.indexOf(futureTask);
-					System.out.println("Do you want to cancel this " + stringRepresentation + " @index:" + indexOfFutureTask + " task? (yes/no)");
-					String input = Clavier.lireString();
+					System.out.println(cancelQuerry);
+					int input = Clavier.lireInt();
 					
 					switch(input)
 						{
-						case "yes":
+						case 1:
 							futureTask.cancel(true);
-							//correctInputFromConsole = true;
 							break;
-						case "no":
-							//correctInputFromConsole = true;
-							// Do nothing
+						case 0:
 							break;
-						default:
-							System.out.println("Please write \"yes\" or \"no\".");
+						}
+					
+					System.out.println(modifyQuerry);
+					input = Clavier.lireInt();
+					
+					switch(input)
+						{
+						case 1:
+							((SpecializedFutureTask<BigDecimal>)futureTask).modifyCallable(true);
+							break;
+						case 0:
+							((SpecializedFutureTask<BigDecimal>)futureTask).modifyCallable(false);
 							break;
 						}
 					}
@@ -192,7 +172,7 @@ public class UseCallable
 		
 		BigDecimal pi_exact = new BigDecimal("3.141592653589793238462643383279");
 		
-		// Impression du résultat
+		// Print the result
 		System.out.println("Temps :" + (stop - start) + "[ms]");
 		System.out.println("Pi calc. : " + somme_totale);
 		System.out.println("Pi exact : " + pi_exact);
@@ -200,7 +180,7 @@ public class UseCallable
 		
 		}
 	
-	// environ 2 secondes
+	// ~2seconds, due to lack of precision
 	private static void piSequentiel()
 		{
 		
